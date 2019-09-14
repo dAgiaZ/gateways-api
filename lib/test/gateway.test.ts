@@ -2,12 +2,14 @@ process.env.NODE_ENV = 'test'
 
 import * as mongoose from 'mongoose'
 import { GatewaySchema } from '../models/gateway.model'
+import { DeviceSchema } from '../models/device.model'
 import * as server from '../server'
 import 'mocha'
 import * as chai from 'chai'
 import chaiHttp = require('chai-http')
 chai.use(chaiHttp)
 const Gateway = mongoose.model('Gateway', GatewaySchema)
+const Device = mongoose.model('Device', DeviceSchema)
 
 /**
  * Data examples
@@ -44,11 +46,14 @@ describe('Gateways', () => {
 
  
   beforeEach((done) => {
-    Gateway.collection.deleteMany({}, done())
+    Gateway.collection.deleteMany({}, () => {
+      Device.collection.deleteMany({}, done())
+    })
   });
   afterEach((done) => {
-    Gateway.collection.deleteMany({}, done())
-    
+    Gateway.collection.deleteMany({}, () => {
+      Device.collection.deleteMany({}, done())
+    })
   });
 
   /*
@@ -153,6 +158,40 @@ describe('Gateways', () => {
         chai.expect(res.body.message).contains('is not a valid IP address.')
         done()
       })
+    })
+
+    //Failed insertion. More than 10 devices
+    it('it should return error because of exceeds 10 associated devices limit', (done) => {
+      const devices = [
+        {uid: '1',vendor: 'Device 1'},
+        {uid: '2',vendor: 'Device 2'},
+        {uid: '3',vendor: 'Device 3'},
+        {uid: '4',vendor: 'Device 4'},
+        {uid: '5',vendor: 'Device 5'},
+        {uid: '6',vendor: 'Device 6'},
+        {uid: '7',vendor: 'Device 7'},
+        {uid: '8',vendor: 'Device 8'},
+        {uid: '9',vendor: 'Device 9'},
+        {uid: '10',vendor: 'Device 10'},
+        {uid: '11',vendor: 'Device 11'},
+      ]
+      Device.collection.insertMany( devices, ( err: any, insertedDevices: any ) => {
+        chai.request(server)
+        .post('/gateways')
+        .send({
+          serialNumber: '2533655',
+          name: 'Gateway more 10',
+          ip: '10.10.50.1',
+          devices: insertedDevices.ops
+        })
+        .then( (res: any) => {
+          chai.expect(res.status).to.eql(400)
+          chai.expect(res.body).to.be.a('object')
+          chai.expect(res.body.message).to.eql('Gateway validation failed: devices: You exceeds the limit of 10 devices')
+          done()
+        })
+      } )
+      
     })
   }).timeout(8000)
 
