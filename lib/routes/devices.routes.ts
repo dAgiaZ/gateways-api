@@ -1,6 +1,4 @@
-import { Request, Response } from "express"
 import { DeviceController } from '../controllers/device.controller'
-
 
 export class DeviceRoutes {
 

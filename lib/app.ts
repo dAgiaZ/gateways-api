@@ -35,7 +35,9 @@ class App {
     mongoose.Promise = global.Promise
     mongoose.connect(this.mongoUrl, {
       useNewUrlParser: true,
-      useFindAndModify: false
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+      useCreateIndex: true
     })
     .catch(error => console.log(error))
   }

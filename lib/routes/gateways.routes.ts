@@ -1,6 +1,4 @@
-import { Request, Response } from "express"
 import { GatewayController } from '../controllers/gateway.controller'
-
 
 export class GatewayRoutes {
 

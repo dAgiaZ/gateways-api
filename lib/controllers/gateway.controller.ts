@@ -6,39 +6,51 @@ const Gateway = mongoose.model('Gateway', GatewaySchema)
 
 export class GatewayController {
 
-  addNewGateway(req: Request, res: Response): void {
-    let newGateway = new Gateway(req.body)
-    newGateway.save()
-    .then( gateway => res.json(gateway) )
-    .catch( err => res.status(400).send(err) )
+  public async addNewGateway(req: Request, res: Response) {
+    try {
+      let newGateway = new Gateway(req.body)
+      await newGateway.save()
+      return res.json(newGateway)
+    } catch (err) {
+      return res.status(400).send(err) 
+    }
   }
 
-  getGateways(req: Request, res: Response): void {
-    Gateway.find({}).populate('devices')
-    .then( gateways => res.json(gateways) )
-    .catch( err => res.status(400).send(err) )
+  public async getGateways(req: Request, res: Response) {
+    try {
+      const gateways = await Gateway.find({}).populate('devices')
+      return res.json(gateways)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  getGatewayWithId(req: Request, res: Response): void {
-    Gateway.findById(req.params.gatewayId).populate('devices')
-    .then( gateway => res.json(gateway) )
-    .catch( err => res.status(400).send(err) )
+  public async getGatewayWithId(req: Request, res: Response) {
+    try {
+      const gateway = await Gateway.findById(req.params.gatewayId).populate('devices')
+      return res.json(gateway)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  updateGateway(req: Request, res: Response): void {
-    Gateway.findOneAndUpdate({ _id: req.params.gatewayId }, req.body, { new: true, runValidators: true }).populate('devices')
-    .then( gateway => res.json(gateway) )
-    .catch( err => res.status(400).send(err)  )
+  public async updateGateway(req: Request, res: Response) {
+    try {
+      const gateway = await Gateway.findOneAndUpdate({ _id: req.params.gatewayId }, req.body, { new: true, runValidators: true }).populate('devices')
+      return res.json(gateway)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  deleteGateway(req: Request, res: Response): void {
-    Gateway.deleteOne({ _id: req.params.gatewayId })
-    .then( () => {
-      Gateway.find({}).populate('devices')
-      .then( gateways => res.json(gateways) )
-      .catch( err => res.status(400).send(err) )
-    } )
-    .catch( err => res.status(400).send(err)  )
+  public async deleteGateway(req: Request, res: Response) {
+    try {
+      await Gateway.deleteOne({ _id: req.params.gatewayId })
+      const gateways = await Gateway.find({}).populate('devices')
+      return res.json(gateways)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
 }

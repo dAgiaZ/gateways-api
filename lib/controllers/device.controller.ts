@@ -6,40 +6,51 @@ const Device = mongoose.model('Device', DeviceSchema)
 
 export class DeviceController {
 
-  public addNewDevice(req: Request, res: Response) {
-    let newDevice = new Device(req.body)
-    newDevice.save()
-    .then( device => res.json(device) )
-    .catch( err => res.status(400).send(err) )
+  public async addNewDevice(req: Request, res: Response) {
+    try {
+      let newDevice = new Device(req.body)
+      await newDevice.save()
+      return res.json(newDevice)
+    } catch (err) {
+      return res.status(400).send(err) 
+    }
   }
 
-  public getDevices(req: Request, res: Response) {
-    Device.find({})
-    .then( devices => res.json(devices) )
-    .catch( err => res.status(400).send(err) )
+  public async getDevices(req: Request, res: Response) {
+    try {
+      const devices = await Device.find({})
+      return res.json(devices)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  public getDeviceWithId(req: Request, res: Response) {
-    Device.findById(req.params.deviceId)
-    .then( device => res.json(device) )
-    .catch( err => res.status(400).send(err))
+  public async getDeviceWithId(req: Request, res: Response) {
+    try {
+      const device = await Device.findById(req.params.deviceId)
+      return res.json(device)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  public updateDevice(req: Request, res: Response) {
-    Device.findOneAndUpdate({ _id: req.params.deviceId }, req.body, { new: true })
-    .then( device => res.json(device) )
-    .catch( err => res.status(400).send(err) )
+  public async updateDevice(req: Request, res: Response) {
+    try {
+      const device = await Device.findOneAndUpdate({ _id: req.params.deviceId }, req.body, { new: true })
+      return res.json(device)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
 
-  public deleteDevice(req: Request, res: Response) {
-    Device.deleteOne({ _id: req.params.deviceId })
-    .then( () => {
-      Device.find({})
-      .then( devices => res.json(devices) )
-      .catch( err => res.status(400).send(err) )
-    } )
-    .catch( err => res.status(400).send(err) )
+  public async deleteDevice(req: Request, res: Response) {
+    try {
+      await Device.deleteOne({ _id: req.params.deviceId })
+      const devices = await Device.find({})
+      return res.json(devices)
+    } catch (err) {
+      return res.status(400).send(err)
+    }
   }
-
 
 }
